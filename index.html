@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Matching Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150vh;
+            margin: 0;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+        }
+        .card, .flippedcard {
+            width: 100px;
+            height: 100px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            cursor: pointer;
+            background-color: whitesmoke;
+        }
+        .flippedcard {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-board"></div>
+    <script>
+        const board = document.querySelector('.game-board');
+        const numbers = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8];
+        let cards = [...numbers].sort(() => Math.random() - 0.5);
+        const flipped = Array.from({ length: 16 }).fill(false);
+        let flipcount = 0;
+        let flip1value = null;
+        let flip1index = null;
+
+        function create_cards() {
+            board.innerHTML = '';
+            cards.forEach((value, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.textContent = '?';
+                card.addEventListener('click', () => flipcard(index));
+                board.appendChild(card);
+            });
+        }
+
+        function flipcard(index) {
+            if (gameover()) {
+                setTimeout(() => {
+                    alert("Congratulations! You won");
+                    resetgame();
+                }, 100);
+                return;
+            }
+
+            if (!flipped[index]) {
+                flipcount++;
+                const value = cards[index];
+                flipped[index] = true;
+                const card = board.children[index];
+                card.classList.add('flippedcard');
+                card.classList.remove('card');
+                card.textContent = cards[index];
+
+                if (flipcount === 1) {
+                    flip1value = cards[index];
+                    flip1index = index;
+                } else if (flipcount === 2) {
+                    if (flip1value !== value) {
+                        setTimeout(() => {
+                            resetcard(flip1index);
+                            resetcard(index);
+                            flipcount = 0;
+                            flip1value = null;
+                            flip1index = null;
+                        }, 1000);
+                    } else {
+                        flipcount = 0;
+                        flip1value = null;
+                        flip1index = null;
+                    }
+                }
+            }
+        }
+
+        function resetcard(index) {
+            const card = board.children[index];
+            card.classList.add('card');
+            card.classList.remove('flippedcard');
+            card.textContent = "?";
+            flipped[index] = false;
+        }
+
+        function gameover() {
+            return flipped.every(val => val === true);
+        }
+
+        function resetgame() {
+            cards.fill(null);
+            flipped.fill(false);
+            create_cards();
+                }
+
+        create_cards();
+    </script>
+</body>
+</html>
